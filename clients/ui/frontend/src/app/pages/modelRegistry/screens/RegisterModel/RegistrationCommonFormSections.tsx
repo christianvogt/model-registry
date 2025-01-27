@@ -1,25 +1,27 @@
 import React from 'react';
 import {
   FormGroup,
-  TextInput,
-  TextArea,
-  Radio,
-  Split,
-  SplitItem,
-  HelperText,
-  HelperTextItem,
-  FormHelperText,
-  InputGroupItem,
-  InputGroupText,
+  // TextInput,
+  // TextArea,
+  // Radio,
+  // Split,
+  // SplitItem,
+  // HelperText,
+  // HelperTextItem,
+  // FormHelperText,
+  // InputGroupItem,
+  // InputGroupText,
 } from '@patternfly/react-core';
-import spacing from '@patternfly/react-styles/css/utilities/Spacing/spacing';
+// import { Radio, HelperText, HelperTextItem, FormHelperText } from '@patternfly/react-core';
+// import spacing from '@patternfly/react-styles/css/utilities/Spacing/spacing';
 import { UpdateObjectAtPropAndValue } from '~/shared/types';
+import { Radio, FormTextArea, FormTextInput, Split, SplitItem } from 'kubeflow-ui';
 // import { DataConnection, UpdateObjectAtPropAndValue } from '~/pages/projects/types';
 // import { convertAWSSecretData } from '~/pages/projects/screens/detail/data-connections/utils';
-import FormFieldset from '~/app/pages/modelRegistry/screens/components/FormFieldset';
+// import FormFieldset from '~/app/pages/modelRegistry/screens/components/FormFieldset';
 import FormSection from '~/shared/components/pf-overrides/FormSection';
 import { ModelVersion } from '~/app/types';
-import { isMUITheme } from '~/shared/utilities/const';
+// import { isMUITheme } from '~/shared/utilities/const';
 import { ModelLocationType, RegistrationCommonFormData } from './useRegisterModelData';
 import { isNameValid } from './utils';
 import { MR_CHARACTER_LIMIT } from './const';
@@ -73,20 +75,26 @@ const RegistrationCommonFormSections = <D extends RegistrationCommonFormData>({
   } = formData;
 
   const versionNameInput = (
-    <TextInput
+    <FormTextInput
+      label="Version name"
       isRequired
       type="text"
       id="version-name"
       name="version-name"
       value={versionName}
       onChange={(_e, value) => setData('versionName', value)}
-      validated={isVersionNameValid ? 'default' : 'error'}
+      // TODO
+      // validated={isVersionNameValid ? 'default' : 'error'}
+      helperText={latestVersion ? `Current version is ${latestVersion.name}` : undefined}
+
+      // TODO 2nd helper text
+      // !isVersionNameValid ? `Cannot exceed ${MR_CHARACTER_LIMIT} characters` : undefined
     />
   );
 
   const versionDescriptionInput = (
-    <TextArea
-      type="text"
+    <FormTextArea
+      label="Version description"
       id="version-description"
       name="version-description"
       value={versionDescription}
@@ -95,7 +103,8 @@ const RegistrationCommonFormSections = <D extends RegistrationCommonFormData>({
   );
 
   const sourceModelFormatInput = (
-    <TextInput
+    <FormTextInput
+      label="Source model format"
       type="text"
       placeholder="Example, tensorflow"
       id="source-model-format"
@@ -106,7 +115,8 @@ const RegistrationCommonFormSections = <D extends RegistrationCommonFormData>({
   );
 
   const sourceModelFormatVersionInput = (
-    <TextInput
+    <FormTextInput
+      label="Source model format version"
       type="text"
       placeholder="Example, 1"
       id="source-model-format-version"
@@ -117,7 +127,8 @@ const RegistrationCommonFormSections = <D extends RegistrationCommonFormData>({
   );
 
   const endpointInput = (
-    <TextInput
+    <FormTextInput
+      label="Endpoint"
       isRequired
       type="text"
       id="location-endpoint"
@@ -128,7 +139,8 @@ const RegistrationCommonFormSections = <D extends RegistrationCommonFormData>({
   );
 
   const bucketInput = (
-    <TextInput
+    <FormTextInput
+      label="Bucket"
       isRequired
       type="text"
       id="location-bucket"
@@ -139,7 +151,8 @@ const RegistrationCommonFormSections = <D extends RegistrationCommonFormData>({
   );
 
   const regionInput = (
-    <TextInput
+    <FormTextInput
+      label="Region"
       type="text"
       id="location-region"
       name="location-region"
@@ -149,20 +162,22 @@ const RegistrationCommonFormSections = <D extends RegistrationCommonFormData>({
   );
 
   const pathInput = (
-    <InputGroupItem>
-      <TextInput
-        isRequired
-        type="text"
-        id="location-path"
-        name="location-path"
-        value={modelLocationPath}
-        onChange={(_e, value) => setData('modelLocationPath', value)}
-      />
-    </InputGroupItem>
+    <FormTextInput
+      label="Path"
+      isRequired
+      startAdornment="/"
+      type="text"
+      id="location-path"
+      name="location-path"
+      value={modelLocationPath}
+      onChange={(_e, value) => setData('modelLocationPath', value)}
+      helperText="Enter a path to a model or folder. This path cannot point to a root folder."
+    />
   );
 
   const uriInput = (
-    <TextInput
+    <FormTextInput
+      label="URI"
       isRequired
       type="text"
       id="location-uri"
@@ -182,12 +197,15 @@ const RegistrationCommonFormSections = <D extends RegistrationCommonFormData>({
             : 'Configure details for the version of this model.'
         }
       >
-        <FormGroup label="Version name" isRequired fieldId="version-name">
+        {/* <FormGroup label="Version name" isRequired fieldId="version-name">
           {isMUITheme() ? (
             <FormFieldset component={versionNameInput} field="Version Name" />
           ) : (
             versionNameInput
           )}
+        </FormGroup> */}
+        {versionNameInput}
+        {/* {latestVersion && (
           <FormHelperText>
             {latestVersion && (
               <HelperText>
@@ -202,31 +220,28 @@ const RegistrationCommonFormSections = <D extends RegistrationCommonFormData>({
               </HelperText>
             )}
           </FormHelperText>
-        </FormGroup>
-        <FormGroup label="Version description" fieldId="version-description">
+        )} */}
+        {/* <FormGroup
+          className="version-description"
+          label="Version description"
+          fieldId="version-description"
+        >
           {isMUITheme() ? (
             <FormFieldset component={versionDescriptionInput} field="Version Description" />
           ) : (
             versionDescriptionInput
           )}
-        </FormGroup>
-        <FormGroup label="Source model format" fieldId="source-model-format">
+        </FormGroup> */}
+        {versionDescriptionInput}
+        {/* <FormGroup label="Source model format" fieldId="source-model-format">
           {isMUITheme() ? (
             <FormFieldset component={sourceModelFormatInput} field="Source Model Format" />
           ) : (
             sourceModelFormatInput
           )}
-        </FormGroup>
-        <FormGroup label="Source model format version" fieldId="source-model-format-version">
-          {isMUITheme() ? (
-            <FormFieldset
-              component={sourceModelFormatVersionInput}
-              field="Source Model Format Version"
-            />
-          ) : (
-            sourceModelFormatVersionInput
-          )}
-        </FormGroup>
+        </FormGroup> */}
+        {sourceModelFormatInput}
+        {sourceModelFormatVersionInput}
       </FormSection>
       <FormSection
         title="Model location"
@@ -260,7 +275,7 @@ const RegistrationCommonFormSections = <D extends RegistrationCommonFormData>({
         </Split>
         {modelLocationType === ModelLocationType.ObjectStorage && (
           <>
-            <FormGroup
+            {/* <FormGroup
               className={spacing.mlLg}
               label="Endpoint"
               isRequired
@@ -271,31 +286,51 @@ const RegistrationCommonFormSections = <D extends RegistrationCommonFormData>({
               ) : (
                 endpointInput
               )}
-            </FormGroup>
-            <FormGroup className={spacing.mlLg} label="Bucket" isRequired fieldId="location-bucket">
+            </FormGroup> */}
+            {endpointInput}
+            {/* <FormGroup className={spacing.mlLg} label="Bucket" isRequired fieldId="location-bucket">
               {isMUITheme() ? <FormFieldset component={bucketInput} field="Bucket" /> : bucketInput}
-            </FormGroup>
-            <FormGroup className={spacing.mlLg} label="Region" fieldId="location-region">
+            </FormGroup> */}
+            {bucketInput}
+            {/* <FormGroup className={spacing.mlLg} label="Region" fieldId="location-region">
               {isMUITheme() ? <FormFieldset component={regionInput} field="Region" /> : regionInput}
-            </FormGroup>
-            <FormGroup className={spacing.mlLg} label="Path" isRequired fieldId="location-path">
-              <Split hasGutter>
-                <SplitItem>
-                  <InputGroupText isPlain>/</InputGroupText>
-                </SplitItem>
-                <SplitItem isFilled>
-                  {isMUITheme() ? <FormFieldset component={pathInput} field="Path" /> : pathInput}
-                </SplitItem>
-              </Split>
+            </FormGroup> */}
+            {regionInput}
+            {/* <FormGroup className={spacing.mlLg} label="Path" isRequired fieldId="location-path">
+              {isMUITheme() ? <FormFieldset component={pathInput} field="Path" /> : pathInput}
+            </FormGroup> */}
+            {pathInput}
+            {/* <FormHelperText className="path-helper-text">
               <HelperText>
                 <HelperTextItem>
                   Enter a path to a model or folder. This path cannot point to a root folder.
                 </HelperTextItem>
               </HelperText>
-            </FormGroup>
+            </FormHelperText> */}
           </>
         )}
-        <Radio
+        <Split>
+          <SplitItem isFilled>
+            <Radio
+              isChecked={modelLocationType === ModelLocationType.URI}
+              name="location-type-uri"
+              onChange={() => {
+                setData('modelLocationType', ModelLocationType.URI);
+              }}
+              label="URI"
+              id="location-type-uri"
+            />
+          </SplitItem>
+        </Split>
+        {modelLocationType === ModelLocationType.URI && (
+          <>
+            {/* <FormGroup className={spacing.mlLg} label="URI" isRequired fieldId="location-uri">
+              {isMUITheme() ? <FormFieldset component={uriInput} field="URI" /> : uriInput}
+            </FormGroup> */}
+            {uriInput}
+          </>
+        )}
+        {/* <Radio
           isChecked={modelLocationType === ModelLocationType.URI}
           name="location-type-uri"
           onChange={() => {
@@ -312,7 +347,7 @@ const RegistrationCommonFormSections = <D extends RegistrationCommonFormData>({
               </>
             )
           }
-        />
+        /> */}
       </FormSection>
       {/* {isAutofillModalOpen ? (
         <ConnectionModal

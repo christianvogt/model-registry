@@ -159,8 +159,30 @@ module.exports = (env) => {
             },
           ],
         },
+        // {
+        //   test: /\.s[ac]ss$/i,
+        //   use: [
+        //     // Creates `style` nodes from JS strings
+        //     'style-loader',
+        //     // Translates CSS into CommonJS
+        //     'css-loader',
+        //     // Compiles Sass to CSS
+        //     'sass-loader',
+        //   ],
+        // },
         {
-          test: /\.s[ac]ss$/i,
+          test: /\.css$/i,
+          include: ['/Users/cvogt/dev/kubeflow-ui'],
+          use: [
+            // Creates `style` nodes from JS strings
+            'style-loader',
+            // Translates CSS into CommonJS
+            'css-loader',
+          ],
+        },
+        {
+          test: /\.scss$/i,
+          include: [SRC_DIR, COMMON_DIR, '/Users/cvogt/dev/kubeflow-ui'],
           use: [
             // Creates `style` nodes from JS strings
             'style-loader',
@@ -237,9 +259,18 @@ module.exports = (env) => {
     resolve: {
       extensions: ['.js', '.ts', '.tsx', '.jsx'],
       alias: {
+        // 'kubeflow-ui': path.resolve(
+        //   SRC_DIR,
+        //   'pf-mui/libs',
+        //   process.env.STYLE_THEME === 'mui-theme' ? 'mui' : 'patternfly',
+        // ),
+        'kubeflow-ui': `/Users/cvogt/dev/${process.env.STYLE_THEME === 'mui-theme' ? 'kubeflow-ui' : 'pf-mui'}`, //path.resolve(__dirname, '../node_modules/kubeflow-ui'),
+        // 'kubeflow-ui': '/Users/cvogt/dev/kubeflow-ui', //path.resolve(__dirname, '../node_modules/kubeflow-ui'),
         '~': path.resolve(SRC_DIR),
+        react$: path.resolve(__dirname, '../node_modules/react'),
+        'react-dom': path.resolve(__dirname, '../node_modules/react-dom'),
       },
-      symlinks: false,
+      symlinks: true,
       cacheWithContext: false,
     },
   };

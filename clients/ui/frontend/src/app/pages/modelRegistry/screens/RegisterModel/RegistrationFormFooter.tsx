@@ -1,13 +1,6 @@
 import React from 'react';
-import {
-  PageSection,
-  Stack,
-  StackItem,
-  Button,
-  ActionList,
-  ActionListItem,
-  ActionListGroup,
-} from '@patternfly/react-core';
+import { ActionList, ActionListItem, ActionListGroup } from '@patternfly/react-core';
+import { PageSection, Button, Stack, StackItem } from 'kubeflow-ui';
 import RegisterModelErrors from './RegisterModelErrors';
 
 type RegistrationFormFooterProps = {
@@ -43,6 +36,17 @@ const RegistrationFormFooter: React.FC<RegistrationFormFooterProps> = ({
           versionName={versionName}
           modelName={modelName}
         />
+        // <StackItem>
+        //   <Alert
+        //     // isInline
+        //     variant="danger"
+        //     title={submitError.name}
+        //     // actionClose={<AlertActionCloseButton onClose={() => setSubmitError(undefined)} />}
+        //     onClose={() => setSubmitError(undefined)}
+        //   >
+        //     {submitError.message}
+        //   </Alert>
+        // </StackItem>
       )}
       <StackItem>
         <ActionList>

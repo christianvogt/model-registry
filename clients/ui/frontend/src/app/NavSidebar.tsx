@@ -9,7 +9,7 @@ import {
   PageSidebar,
   PageSidebarBody,
 } from '@patternfly/react-core';
-import { LOGO_LIGHT } from '~/shared/utilities/const';
+import { isMUITheme, LOGO_LIGHT, Theme } from '~/shared/utilities/const';
 import { useNavData, isNavDataGroup, NavDataHref, NavDataGroup } from './AppRoutes';
 
 const NavHref: React.FC<{ item: NavDataHref }> = ({ item }) => (
@@ -44,7 +44,7 @@ const NavSidebar: React.FC = () => {
   const navData = useNavData();
 
   return (
-    <PageSidebar>
+    <PageSidebar className={isMUITheme() ? Theme.MUI : ''}>
       <PageSidebarBody>
         <Nav id="nav-primary-simple">
           <NavList id="nav-list-simple">

@@ -23,6 +23,7 @@ const moduleFederationConfig = {
     'react-dom': { singleton: true, eager: true, requiredVersion: deps['react-dom'] },
     'react-router': { singleton: true, eager: true, requiredVersion: deps['react-router'] },
     'react-router-dom': { singleton: true, eager: true, requiredVersion: deps['react-router-dom'] },
+    'kubeflow-ui': { singleton: true, eager: true },
     // TODO list all shared dependencies here
   },
   exposes: {

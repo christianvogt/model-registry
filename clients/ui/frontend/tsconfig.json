@@ -23,6 +23,12 @@
     "strict": true,
     "baseUrl": "./src",
     "paths": {
+      "~/pf-mui": [
+        "../node_modules/kubeflow-ui"
+      ],
+      "kubeflow-ui": [
+        "../node_modules/kubeflow-ui/src/index.ts"
+      ],
       "~/*": [
         "./*"
       ]

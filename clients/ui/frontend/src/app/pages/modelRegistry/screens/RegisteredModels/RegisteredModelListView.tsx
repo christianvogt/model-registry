@@ -1,11 +1,12 @@
 import * as React from 'react';
 import {
-  SearchInput,
+  // SearchInput,
   TextInput,
   ToolbarFilter,
   ToolbarGroup,
   ToolbarItem,
 } from '@patternfly/react-core';
+import { SearchInput } from 'kubeflow-ui';
 import { FilterIcon } from '@patternfly/react-icons';
 import { useNavigate } from 'react-router-dom';
 import { ModelVersion, RegisteredModel } from '~/app/types';
@@ -108,7 +109,7 @@ const RegisteredModelListView: React.FC<RegisteredModelListViewProps> = ({
         />
       </ToolbarFilter>
       <ToolbarItem>
-        {isMUITheme() ? (
+        {/* {isMUITheme() ? (
           <FormFieldset
             className="toolbar-fieldset-wrapper"
             component={
@@ -125,18 +126,18 @@ const RegisteredModelListView: React.FC<RegisteredModelListViewProps> = ({
             }
             field={`Find by ${searchType.toLowerCase()}`}
           />
-        ) : (
-          <SearchInput
-            placeholder={`Find by ${searchType.toLowerCase()}`}
-            value={search}
-            onChange={(_, searchValue) => {
-              setSearch(searchValue);
-            }}
-            onClear={resetFilters}
-            style={{ minWidth: '200px' }}
-            data-testid="registered-model-table-search"
-          />
-        )}
+        ) : ( */}
+        <SearchInput
+          placeholder={`Find by ${searchType.toLowerCase()}`}
+          value={search}
+          onChange={(_, searchValue) => {
+            setSearch(searchValue);
+          }}
+          onClear={resetFilters}
+          style={{ minWidth: '200px' }}
+          data-testid="registered-model-table-search"
+        />
+        {/* )} */}
       </ToolbarItem>
     </ToolbarGroup>
   );

@@ -18,6 +18,7 @@ import {
 import { SimpleSelect } from '@patternfly/react-templates';
 import { BarsIcon } from '@patternfly/react-icons';
 import { NamespaceSelectorContext } from '~/shared/context/NamespaceSelectorContext';
+import { isMUITheme, Theme } from '~/shared/utilities/const';
 
 interface NavBarProps {
   username?: string;
@@ -48,7 +49,7 @@ const NavBar: React.FC<NavBarProps> = ({ username, onLogout }) => {
   ];
 
   return (
-    <Masthead>
+    <Masthead className={isMUITheme() ? Theme.MUI : ''}>
       <MastheadMain>
         <MastheadToggle>
           <PageToggleButton id="page-nav-toggle" variant="plain" aria-label="Dashboard navigation">

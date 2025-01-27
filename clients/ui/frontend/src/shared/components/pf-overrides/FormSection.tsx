@@ -20,7 +20,9 @@ const FormSection: React.FC<Props> = ({
     title={
       description ? (
         <>
-          <TitleElement className="pf-v6-c-form__section-title">{title}</TitleElement>
+          <TitleElement className="pf-v6-c-form__section-title" style={{ marginBlockEnd: 0 }}>
+            {title}
+          </TitleElement>
           <Content component="p" className="kf-form-section__desc">
             {description}
           </Content>

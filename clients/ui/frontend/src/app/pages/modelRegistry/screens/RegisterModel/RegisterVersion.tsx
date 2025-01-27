@@ -1,17 +1,17 @@
 import React from 'react';
+import { FormGroup } from '@patternfly/react-core';
+import spacing from '@patternfly/react-styles/css/utilities/Spacing/spacing';
+import { useParams, useNavigate } from 'react-router';
+import { Link } from 'react-router-dom';
 import {
-  Breadcrumb,
-  BreadcrumbItem,
   Form,
-  FormGroup,
   PageSection,
   Spinner,
   Stack,
   StackItem,
-} from '@patternfly/react-core';
-import spacing from '@patternfly/react-styles/css/utilities/Spacing/spacing';
-import { useParams, useNavigate } from 'react-router';
-import { Link } from 'react-router-dom';
+  Breadcrumbs,
+  BreadcrumbItem,
+} from 'kubeflow-ui';
 import ApplicationsPage from '~/shared/components/ApplicationsPage';
 import { modelRegistryUrl, registeredModelUrl } from '~/app/pages/modelRegistry/screens/routeUtils';
 import useRegisteredModels from '~/app/hooks/useRegisteredModels';
@@ -88,21 +88,13 @@ const RegisterVersion: React.FC = () => {
       title="Register new version"
       description="Register a latest version to the model you selected below."
       breadcrumb={
-        <Breadcrumb>
-          <BreadcrumbItem
-            render={() => <Link to={modelRegistryUrl(mrName)}>Model registry - {mrName}</Link>}
-          />
+        <Breadcrumbs>
+          <Link to={modelRegistryUrl(mrName)}>Model registry - {mrName}</Link>
           {prefilledRegisteredModelId && registeredModel && (
-            <BreadcrumbItem
-              render={() => (
-                <Link to={registeredModelUrl(registeredModel.id, mrName)}>
-                  {registeredModel.name}
-                </Link>
-              )}
-            />
+            <Link to={registeredModelUrl(registeredModel.id, mrName)}>{registeredModel.name}</Link>
           )}
           <BreadcrumbItem>Register new version</BreadcrumbItem>
-        </Breadcrumb>
+        </Breadcrumbs>
       }
       loadError={loadRegisteredModelsError || loadPrefillDataError}
       // Data for prefilling is refetched when the model selection changes, so we don't handle its loaded state here.
@@ -123,7 +115,9 @@ const RegisterVersion: React.FC = () => {
                 isRequired
                 fieldId="model-name"
                 labelHelp={
-                  !loadedPrefillData ? <Spinner size="sm" className={spacing.mlMd} /> : undefined
+                  !loadedPrefillData ? (
+                    <Spinner size="sm" /*className={spacing.mlMd}*/ />
+                  ) : undefined
                 }
               >
                 <RegisteredModelSelector

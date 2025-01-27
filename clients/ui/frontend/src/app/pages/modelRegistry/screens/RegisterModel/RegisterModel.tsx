@@ -1,26 +1,36 @@
 import React from 'react';
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  Form,
-  FormGroup,
-  FormHelperText,
-  HelperText,
-  HelperTextItem,
-  PageSection,
-  Stack,
-  StackItem,
-  TextArea,
-  TextInput,
-} from '@patternfly/react-core';
+// import {
+//   Breadcrumb,
+//   BreadcrumbItem,
+//   Form,
+//   FormGroup,
+//   FormHelperText,
+//   HelperText,
+//   HelperTextItem,
+//   PageSection,
+//   Stack,
+//   StackItem,
+//   TextArea,
+//   TextInput,
+// } from '@patternfly/react-core';
 import spacing from '@patternfly/react-styles/css/utilities/Spacing/spacing';
 import { useParams, useNavigate } from 'react-router';
 import { Link } from 'react-router-dom';
-import FormFieldset from '~/app/pages/modelRegistry/screens/components/FormFieldset';
-import FormSection from '~/shared/components/pf-overrides/FormSection';
+import {
+  Breadcrumbs,
+  BreadcrumbItem,
+  Stack,
+  StackItem,
+  Form,
+  PageSection,
+  FormSection,
+  FormTextInput,
+  FormTextArea,
+} from 'kubeflow-ui';
+// import FormFieldset from '~/app/pages/modelRegistry/screens/components/FormFieldset';
 import ApplicationsPage from '~/shared/components/ApplicationsPage';
 import { modelRegistryUrl, registeredModelUrl } from '~/app/pages/modelRegistry/screens/routeUtils';
-import { isMUITheme } from '~/shared/utilities/const';
+// import { isMUITheme } from '~/shared/utilities/const';
 import { ModelRegistryContext } from '~/app/context/ModelRegistryContext';
 import { AppContext } from '~/app/AppContext';
 import { useRegisterModelData } from './useRegisterModelData';
@@ -68,19 +78,24 @@ const RegisterModel: React.FC = () => {
   const onCancel = () => navigate(modelRegistryUrl(mrName));
 
   const modelNameInput = (
-    <TextInput
+    <FormTextInput
       isRequired
       type="text"
       id="model-name"
       name="model-name"
       value={modelName}
       onChange={(_e, value) => setData('modelName', value)}
+      label="Model name"
+      // TODO
+      // validated={isModelNameValid ? 'default' : 'error'}
+      helperText={isModelNameValid ? undefined : `Cannot exceed ${MR_CHARACTER_LIMIT} characters`}
     />
   );
 
   const modelDescriptionInput = (
-    <TextArea
-      type="text"
+    <FormTextArea
+      label="Model description"
+      // type="text"
       id="model-description"
       name="model-description"
       value={modelDescription}
@@ -93,12 +108,10 @@ const RegisterModel: React.FC = () => {
       title="Register model"
       description="Create a new model and register the first version of your new model."
       breadcrumb={
-        <Breadcrumb>
-          <BreadcrumbItem
-            render={() => <Link to={modelRegistryUrl(mrName)}>Model registry - {mrName}</Link>}
-          />
+        <Breadcrumbs>
+          <Link to={modelRegistryUrl(mrName)}>Model registry - {mrName}</Link>
           <BreadcrumbItem>Register model</BreadcrumbItem>
-        </Breadcrumb>
+        </Breadcrumbs>
       }
       loaded
       empty={false}
@@ -114,7 +127,8 @@ const RegisterModel: React.FC = () => {
                 title="Model details"
                 description="Provide general details that apply to all versions of this model."
               >
-                <FormGroup label="Model name" isRequired fieldId="model-name">
+                {modelNameInput}
+                {/* <FormGroup label="Model name" isRequired fieldId="model-name">
                   {isMUITheme() ? (
                     <FormFieldset component={modelNameInput} field="Model Name" />
                   ) : (
@@ -132,6 +146,9 @@ const RegisterModel: React.FC = () => {
                 </FormGroup>
                 <FormGroup
                   className="model-description"
+                </FormGroup> */}
+                {/* <FormGroup
+                  // className="model-description"
                   label="Model description"
                   fieldId="model-description"
                 >
@@ -140,7 +157,8 @@ const RegisterModel: React.FC = () => {
                   ) : (
                     modelDescriptionInput
                   )}
-                </FormGroup>
+                </FormGroup> */}
+                {modelDescriptionInput}
               </FormSection>
               <RegistrationCommonFormSections
                 formData={formData}
