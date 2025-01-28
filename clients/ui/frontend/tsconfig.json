@@ -38,6 +38,7 @@
     "**/*.js"
   ],
   "exclude": [
+    "config",
     "node_modules",
     "dist",
     "public-cypress",

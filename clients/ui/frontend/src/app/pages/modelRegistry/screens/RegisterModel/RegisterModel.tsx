@@ -35,7 +35,7 @@ const RegisterModel: React.FC = () => {
   const navigate = useNavigate();
   const { apiState } = React.useContext(ModelRegistryContext);
   const { user } = React.useContext(AppContext);
-  const author = user.userId || '';
+  const author = (user && user.userId) || '';
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [submitError, setSubmitError] = React.useState<Error | undefined>(undefined);
   const [formData, setData] = useRegisterModelData();

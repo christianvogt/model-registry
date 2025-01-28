@@ -58,6 +58,16 @@ module.exports = smp.wrap(
             },
             changeOrigin: true,
           },
+          {
+            context: ["/model-registry/api"],
+            pathRewrite: { '^/model-registry': '' },
+            target: {
+              host: PROXY_HOST,
+              protocol: PROXY_PROTOCOL,
+              port: PROXY_PORT,
+            },
+            changeOrigin: true,
+          },
         ],
         devMiddleware: {
           stats: 'errors-only',

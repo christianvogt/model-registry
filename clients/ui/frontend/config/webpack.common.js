@@ -3,6 +3,8 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyPlugin = require('copy-webpack-plugin');
 const { setupWebpackDotenvFilesForEnv } = require('./dotenv');
 
+const { moduleFederationPlugins } = require('./moduleFederation');
+
 const RELATIVE_DIRNAME = process.env._RELATIVE_DIRNAME;
 const IS_PROJECT_ROOT_DIR = process.env._IS_PROJECT_ROOT_DIR;
 const IMAGES_DIRNAME = process.env._IMAGES_DIRNAME;
@@ -15,7 +17,9 @@ const FAVICON = process.env.FAVICON;
 const PRODUCT_NAME = process.env.PRODUCT_NAME;
 const COVERAGE = process.env.COVERAGE;
 const DEPLOYMENT_MODE = process.env._DEPLOYMENT_MODE;
-const BASE_PATH = DEPLOYMENT_MODE === 'integrated' ? '/model-registry/' : PUBLIC_PATH;
+const BASE_PATH = ''; //'/model-registry/';
+// const BASE_PATH = DEPLOYMENT_MODE === 'integrated' ? '/model-registry/' : PUBLIC_PATH;
+
 
 if (OUTPUT_ONLY !== 'true') {
   console.info(
@@ -29,7 +33,7 @@ if (OUTPUT_ONLY !== 'true') {
 module.exports = (env) => {
   return {
     entry: {
-      app: path.join(SRC_DIR, 'index.tsx'),
+      app: path.join(SRC_DIR, 'index.ts'),
     },
     module: {
       rules: [
@@ -175,9 +179,11 @@ module.exports = (env) => {
     output: {
       filename: '[name].bundle.js',
       path: DIST_DIR,
-      publicPath: BASE_PATH,
+      publicPath: 'auto',//BASE_PATH,
+      // publicPath: BASE_PATH,
     },
     plugins: [
+      ...moduleFederationPlugins,
       ...setupWebpackDotenvFilesForEnv({
         directory: RELATIVE_DIRNAME,
         isRoot: IS_PROJECT_ROOT_DIR,

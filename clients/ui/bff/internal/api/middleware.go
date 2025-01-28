@@ -2,18 +2,18 @@ package api
 
 import (
 	"context"
-	"errors"
 	"fmt"
+	"log/slog"
+	"net/http"
+	"runtime/debug"
+	"strings"
+
 	"github.com/google/uuid"
 	"github.com/julienschmidt/httprouter"
 	"github.com/kubeflow/model-registry/ui/bff/internal/config"
 	"github.com/kubeflow/model-registry/ui/bff/internal/constants"
 	"github.com/kubeflow/model-registry/ui/bff/internal/integrations"
 	"github.com/rs/cors"
-	"log/slog"
-	"net/http"
-	"runtime/debug"
-	"strings"
 )
 
 func (app *App) RecoverPanic(next http.Handler) http.Handler {
@@ -43,8 +43,8 @@ func (app *App) InjectUserHeaders(next http.Handler) http.Handler {
 		userGroupsHeader := r.Header.Get(constants.KubeflowUserGroupsIdHeader)
 		//`kubeflow-userid`: Contains the user's email address.
 		if userIdHeader == "" {
-			app.badRequestResponse(w, r, errors.New("missing required header: kubeflow-userid"))
-			return
+			// app.badRequestResponse(w, r, errors.New("missing required header: kubeflow-userid"))
+			// return
 		}
 
 		// Note: The functionality for `kubeflow-groups` is not fully operational at Kubeflow platform at this time
