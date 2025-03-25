@@ -15,6 +15,10 @@ import (
 	helper "github.com/kubeflow/model-registry/ui/bff/internal/helpers"
 	"github.com/kubeflow/model-registry/ui/bff/internal/integrations"
 	"github.com/rs/cors"
+	authenticationv1 "k8s.io/api/authentication/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
 )
 
 func (app *App) RecoverPanic(next http.Handler) http.Handler {
@@ -31,36 +35,99 @@ func (app *App) RecoverPanic(next http.Handler) http.Handler {
 	})
 }
 
+func (app *App) getUserInfoFromToken(ctx context.Context, token string) (string, []string, error) {
+	// Get the existing kubeconfig and create a new config with the provided token
+	kubeconfig, err := helper.GetKubeconfig()
+	if err != nil {
+		return "", nil, fmt.Errorf("failed to get kubeconfig: %w", err)
+	}
+
+	config := &rest.Config{
+		Host:        kubeconfig.Host,
+		APIPath:     kubeconfig.APIPath,
+		BearerToken: token,
+		TLSClientConfig: rest.TLSClientConfig{
+			Insecure:   kubeconfig.Insecure,
+			ServerName: kubeconfig.ServerName,
+			CertFile:   kubeconfig.CertFile,
+			KeyFile:    kubeconfig.KeyFile,
+			CAFile:     kubeconfig.CAFile,
+		},
+	}
+
+	clientset, err := kubernetes.NewForConfig(config)
+	if err != nil {
+		return "", nil, fmt.Errorf("failed to create kubernetes client: %w", err)
+	}
+
+	tokenReview := &authenticationv1.TokenReview{
+		Spec: authenticationv1.TokenReviewSpec{
+			Token: token,
+		},
+	}
+
+	response, err := clientset.AuthenticationV1().TokenReviews().Create(ctx, tokenReview, metav1.CreateOptions{})
+	if err != nil {
+		return "", nil, fmt.Errorf("failed to get user information from token: %w", err)
+	}
+
+	if !response.Status.Authenticated {
+		return "", nil, fmt.Errorf("token is not valid: %s", response.Status.Error)
+	}
+
+	// Get the user and groups from the response
+	return response.Status.User.Username, response.Status.User.Groups, nil
+}
+
 func (app *App) InjectUserHeaders(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		//skip use headers check if we are not on /api/v1
+		// Skip use headers check if we are not on /api/v1
 		if !strings.HasPrefix(r.URL.Path, ApiPathPrefix) && !strings.HasPrefix(r.URL.Path, PathPrefix+ApiPathPrefix) {
 			next.ServeHTTP(w, r)
 			return
 		}
 
-		userIdHeader := r.Header.Get(constants.KubeflowUserIDHeader)
-		userGroupsHeader := r.Header.Get(constants.KubeflowUserGroupsIdHeader)
-		//`kubeflow-userid`: Contains the user's email address.
-		if userIdHeader == "" {
-			app.badRequestResponse(w, r, errors.New("missing required header: kubeflow-userid"))
-			return
-		}
-
-		// Note: The functionality for `kubeflow-groups` is not fully operational at Kubeflow platform at this time
-		// but it's supported on Model Registry BFF
-		//`kubeflow-groups`: Holds a comma-separated list of user groups.
+		var userId string
 		var userGroups []string
-		if userGroupsHeader != "" {
-			userGroups = strings.Split(userGroupsHeader, ",")
-			// Trim spaces from each group name
-			for i, group := range userGroups {
-				userGroups[i] = strings.TrimSpace(group)
+
+		if app.config.TokenAuth {
+			// If token auth is enabled, try to get user info from token
+			token := r.Header.Get("X-Forwarded-Access-Token")
+			if token == "" {
+				app.badRequestResponse(w, r, errors.New("missing required header: X-Forwarded-Access-Token"))
+				return
+			}
+
+			userIdFromToken, groupsFromToken, err := app.getUserInfoFromToken(r.Context(), token)
+			if err != nil {
+				app.badRequestResponse(w, r, err)
+				return
+			}
+			userId = userIdFromToken
+			userGroups = groupsFromToken
+		} else {
+			// Get user info from headers
+			userId = r.Header.Get(constants.KubeflowUserIDHeader)
+			if userId == "" {
+				app.badRequestResponse(w, r, errors.New("missing required header: kubeflow-userid"))
+				return
+			}
+
+			// Note: The functionality for `kubeflow-groups` is not fully operational at Kubeflow platform at this time
+			// but it's supported on Model Registry BFF
+			// `kubeflow-groups`: Holds a comma-separated list of user groups.
+			userGroupsHeader := r.Header.Get(constants.KubeflowUserGroupsIdHeader)
+			if userGroupsHeader != "" {
+				userGroups = strings.Split(userGroupsHeader, ",")
+				// Trim spaces from each group name
+				for i, group := range userGroups {
+					userGroups[i] = strings.TrimSpace(group)
+				}
 			}
 		}
 
 		ctx := r.Context()
-		ctx = context.WithValue(ctx, constants.KubeflowUserIdKey, userIdHeader)
+		ctx = context.WithValue(ctx, constants.KubeflowUserIdKey, userId)
 		ctx = context.WithValue(ctx, constants.KubeflowUserGroupsKey, userGroups)
 
 		next.ServeHTTP(w, r.WithContext(ctx))
@@ -137,7 +204,11 @@ func (app *App) AttachRESTClient(next func(http.ResponseWriter, *http.Request, h
 			}
 		}
 
-		client, err := integrations.NewHTTPClient(restClientLogger, modelRegistryID, modelRegistryBaseURL)
+		headers := http.Header{}
+		if app.config.TokenAuth && r.Header.Get("X-Forwarded-Access-Token") != "" {
+			headers.Set("Authorization", fmt.Sprintf("Bearer %s", r.Header.Get("X-Forwarded-Access-Token")))
+		}
+		client, err := integrations.NewHTTPClient(restClientLogger, modelRegistryID, modelRegistryBaseURL, headers)
 		if err != nil {
 			app.serverErrorResponse(w, r, fmt.Errorf("failed to create Kubernetes client: %v", err))
 			return

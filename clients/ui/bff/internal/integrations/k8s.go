@@ -3,6 +3,11 @@ package integrations
 import (
 	"context"
 	"fmt"
+	"log/slog"
+	"os"
+	"strings"
+	"time"
+
 	"github.com/kubeflow/model-registry/ui/bff/internal/constants"
 	helper "github.com/kubeflow/model-registry/ui/bff/internal/helpers"
 	authv1 "k8s.io/api/authorization/v1"
@@ -12,12 +17,9 @@ import (
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
-	"log/slog"
-	"os"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
-	"time"
 )
 
 const ComponentLabelValue = "model-registry"
@@ -37,10 +39,10 @@ type KubernetesClientInterface interface {
 
 type ServiceDetails struct {
 	Name        string
+	Namespace   string
 	DisplayName string
 	Description string
-	ClusterIP   string
-	HTTPPort    int32
+	Url         string
 }
 
 type KubernetesClient struct {
@@ -195,23 +197,39 @@ func (kc *KubernetesClient) GetServiceDetails(sessionCtx context.Context, namesp
 	var services []ServiceDetails
 
 	for _, service := range serviceList.Items {
-		var httpPort int32
-		hasHTTPPort := false
-		for _, port := range service.Spec.Ports {
-			if port.Name == "http-api" {
-				httpPort = port.Port
-				hasHTTPPort = true
-				break
+		url := ""
+		externalAddressRest := ""
+
+		// The external-address-rest annotation takes precedence in constructing the service url
+		if service.Annotations != nil {
+			for key, value := range service.Annotations {
+				if strings.HasSuffix(key, "/external-address-rest") {
+					externalAddressRest = value
+					break
+				}
 			}
 		}
-		if !hasHTTPPort {
-			sessionLogger.Error("service missing HTTP port", "serviceName", service.Name)
-			continue
-		}
 
-		if service.Spec.ClusterIP == "" {
-			sessionLogger.Error("service missing valid ClusterIP", "serviceName", service.Name)
-			continue
+		if externalAddressRest != "" {
+			// Use https for external address
+			url = fmt.Sprintf("https://%s", externalAddressRest)
+		} else {
+			// If the external-address-rest annotation is not present, use the service name, namespace and HTTP port to construct the service url
+			var httpPort int32
+			hasHTTPPort := false
+			for _, port := range service.Spec.Ports {
+				if port.Name == "http-api" {
+					httpPort = port.Port
+					hasHTTPPort = true
+					break
+				}
+			}
+			if !hasHTTPPort {
+				sessionLogger.Error("service missing HTTP port", "serviceName", service.Name)
+				continue
+			}
+
+			url = fmt.Sprintf("http://%s.%s.svc.cluster.local:%d", service.Name, service.Namespace, httpPort)
 		}
 
 		displayName := ""
@@ -232,10 +250,10 @@ func (kc *KubernetesClient) GetServiceDetails(sessionCtx context.Context, namesp
 
 		serviceDetails := ServiceDetails{
 			Name:        service.Name,
+			Namespace:   service.Namespace,
 			DisplayName: displayName,
 			Description: description,
-			ClusterIP:   service.Spec.ClusterIP,
-			HTTPPort:    httpPort,
+			Url:         url,
 		}
 
 		services = append(services, serviceDetails)

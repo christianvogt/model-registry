@@ -16,8 +16,7 @@ var _ = Describe("Kubernetes ControllerRuntimeClient Test", func() {
 
 			By("checking that all services have the modified ClusterIP and HTTPPort")
 			for _, service := range services {
-				Expect(service.ClusterIP).To(Equal("127.0.0.1"), "ClusterIP should be set to 127.0.0.1")
-				Expect(service.HTTPPort).To(Equal(int32(8080)), "HTTPPort should be set to 8080")
+				Expect(service.Url).To(Equal("http://127.0.0.1:8080"), "Url should be set to 127.0.0.1:8080")
 
 			}
 

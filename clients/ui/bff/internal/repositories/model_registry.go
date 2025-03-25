@@ -8,6 +8,10 @@ import (
 	"github.com/kubeflow/model-registry/ui/bff/internal/models"
 )
 
+const (
+	ModelRegistryApiPath = "/api/model_registry/v1alpha3"
+)
+
 type ModelRegistryRepository struct {
 }
 
@@ -24,12 +28,11 @@ func (m *ModelRegistryRepository) GetAllModelRegistries(sessionCtx context.Conte
 
 	var registries = []models.ModelRegistryModel{}
 	for _, s := range resources {
-		serverAddress := m.ResolveServerAddress(s.ClusterIP, s.HTTPPort)
 		registry := models.ModelRegistryModel{
 			Name:          s.Name,
 			Description:   s.Description,
 			DisplayName:   s.DisplayName,
-			ServerAddress: serverAddress,
+			ServerAddress: s.Url + ModelRegistryApiPath,
 		}
 		registries = append(registries, registry)
 	}
@@ -48,13 +51,12 @@ func (m *ModelRegistryRepository) GetModelRegistry(sessionCtx context.Context, c
 		Name:          s.Name,
 		Description:   s.Description,
 		DisplayName:   s.DisplayName,
-		ServerAddress: m.ResolveServerAddress(s.ClusterIP, s.HTTPPort),
+		ServerAddress: s.Url + ModelRegistryApiPath,
 	}
 
 	return modelRegistry, nil
 }
 
-func (m *ModelRegistryRepository) ResolveServerAddress(clusterIP string, httpPort int32) string {
-	url := fmt.Sprintf("http://%s:%d/api/model_registry/v1alpha3", clusterIP, httpPort)
-	return url
+func (m *ModelRegistryRepository) ResolveServerAddress(host string, httpPort int32) string {
+	return fmt.Sprintf("http://%s:%d%s", host, httpPort, ModelRegistryApiPath)
 }
