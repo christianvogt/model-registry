@@ -4,12 +4,13 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
-	"github.com/google/uuid"
-	helper "github.com/kubeflow/model-registry/ui/bff/internal/helpers"
 	"io"
 	"log/slog"
 	"net/http"
 	"strconv"
+
+	"github.com/google/uuid"
+	helper "github.com/kubeflow/model-registry/ui/bff/internal/helpers"
 )
 
 type HTTPClientInterface interface {
@@ -23,6 +24,7 @@ type HTTPClient struct {
 	baseURL         string
 	ModelRegistryID string
 	logger          *slog.Logger
+	Header          http.Header
 }
 
 type ErrorResponse struct {
@@ -39,7 +41,7 @@ func (e *HTTPError) Error() string {
 	return fmt.Sprintf("HTTP %d: %s - %s", e.StatusCode, e.Code, e.Message)
 }
 
-func NewHTTPClient(logger *slog.Logger, modelRegistryID string, baseURL string) (HTTPClientInterface, error) {
+func NewHTTPClient(logger *slog.Logger, modelRegistryID string, baseURL string, header http.Header) (HTTPClientInterface, error) {
 
 	return &HTTPClient{
 		client: &http.Client{Transport: &http.Transport{
@@ -48,11 +50,22 @@ func NewHTTPClient(logger *slog.Logger, modelRegistryID string, baseURL string) 
 		baseURL:         baseURL,
 		ModelRegistryID: modelRegistryID,
 		logger:          logger,
+		Header:          header,
 	}, nil
 }
 
 func (c *HTTPClient) GetModelRegistryID() string {
 	return c.ModelRegistryID
+}
+
+func (c *HTTPClient) applyHeader(req *http.Request) {
+	if req.Header == nil {
+		req.Header = make(http.Header)
+	}
+
+	for k, v := range c.Header {
+		req.Header[k] = v
+	}
 }
 
 func (c *HTTPClient) GET(url string) ([]byte, error) {
@@ -63,6 +76,8 @@ func (c *HTTPClient) GET(url string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	c.applyHeader(req)
 
 	logUpstreamReq(c.logger, requestId, req)
 
@@ -108,6 +123,7 @@ func (c *HTTPClient) POST(url string, body io.Reader) ([]byte, error) {
 		return nil, err
 	}
 
+	c.applyHeader(req)
 	req.Header.Set("Content-Type", "application/json")
 
 	logUpstreamReq(c.logger, requestId, req)
@@ -154,6 +170,7 @@ func (c *HTTPClient) PATCH(url string, body io.Reader) ([]byte, error) {
 
 	requestId := uuid.NewString()
 
+	c.applyHeader(req)
 	req.Header.Set("Content-Type", "application/json")
 
 	logUpstreamReq(c.logger, requestId, req)

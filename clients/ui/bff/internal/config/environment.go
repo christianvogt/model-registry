@@ -12,4 +12,5 @@ type EnvConfig struct {
 	StaticAssetsDir string
 	LogLevel        slog.Level
 	AllowedOrigins  []string
+	TokenAuth       bool
 }
