@@ -3,7 +3,6 @@
 # Check for required tools
 command -v docker >/dev/null 2>&1 || { echo >&2 "Docker is required but it's not installed. Aborting."; exit 1; }
 command -v kubectl >/dev/null 2>&1 || { echo >&2 "kubectl is required but it's not installed. Aborting."; exit 1; }
-command -v kind >/dev/null 2>&1 || { echo >&2 "kind is required but it's not installed. Aborting."; exit 1; }
 
 echo -e "\033[33mWARNING: You must have access to a cluster with kubeflow installed.\033[0m"
 

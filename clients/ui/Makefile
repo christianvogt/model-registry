@@ -93,6 +93,10 @@ kind-deployment:
 kubeflow-deployment:
 	./scripts/deploy_kubeflow_cluster.sh
 
+.PHONY: odh-deployment
+odh-deployment:
+	./scripts/deploy_odh_cluster.sh
+
 ############ Build ############	
 .PHONY: frontend-build
 frontend-build:
@@ -112,7 +116,4 @@ build: frontend-build bff-build
 ############ Run mocked ########
 .PHONY: run-local-mocked
 run-local-mocked: frontend-build-standalone bff-build
-	rm -r ./bff/static-local-run && cp -r ./frontend/dist/ ./bff/static-local-run/ && cd bff && make run STATIC_ASSETS_DIR=./static-local-run MOCK_K8S_CLIENT=true DEV_MODE=true
-
-
-	
+	rm -rf ./bff/static-local-run && cp -r ./frontend/dist/ ./bff/static-local-run/ && cd bff && make run STATIC_ASSETS_DIR=./static-local-run MOCK_K8S_CLIENT=true DEV_MODE=true

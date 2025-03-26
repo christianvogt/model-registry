@@ -9,5 +9,6 @@ resources:
 
 images:
 - name: model-registry-ui
-  newName: ghcr.io/kubeflow/model-registry/ui
-  newTag: latest
+  newName: quay.io/christianvogt/model-registry-ui-integrated
+  newTag: odh
+namespace: kubeflow
